@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL")
+}
+
+model Control {
+  id         String      @id @default(cuid())
+  framework  String
+  controlRef String
+  description String
+  createdAt  DateTime    @default(now())
+  violations Violation[]
+
+  @@map("controls")
+}
+
+model AuditEvent {
+  id         String      @id @default(cuid())
+  rawOutput  String
+  source     String?
+  createdAt  DateTime    @default(now())
+  violations Violation[]
+
+  @@map("audit_events")
+}
+
+model Violation {
+  id               String     @id @default(cuid())
+  auditEventId     String
+  auditEvent       AuditEvent @relation(fields: [auditEventId], references: [id])
+  violationType    String
+  severity         String
+  rationale        String
+  matchedControlId String
+  matchedControl   Control    @relation(fields: [matchedControlId], references: [id])
+  createdAt        DateTime   @default(now())
+
+  @@map("violations")
+}
+
+model RiskRegister {
+  id          String   @id @default(cuid())
+  category    String
+  description String
+  status      String
+  createdAt   DateTime @default(now())
+
+  @@map("risk_register")
+}
