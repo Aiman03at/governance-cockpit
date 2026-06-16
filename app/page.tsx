@@ -1,261 +1,128 @@
 'use client'
-import { useState } from 'react'
 
 export default function Home() {
-  const [output, setOutput] = useState('')
-  const [result, setResult] = useState<any>(null)
-  const [loading, setLoading] = useState(false)
-  const [showTraceback, setShowTraceback] = useState(false)
-
-  async function handleFlag() {
-    setLoading(true)
-    setResult(null)
-    setShowTraceback(false)
-    const res = await fetch('/api/flag', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ output, source: 'TalentCo résumé screener' })
-    })
-    const data = await res.json()
-    setResult(data)
-    setLoading(false)
-  }
-
   return (
-    <main className="min-h-screen bg-gray-950 text-white p-8">
-      <div className="max-w-3xl mx-auto">
+    <main style={{background:'#0a0a0b',color:'#e8e6e0',minHeight:'100vh',fontFamily:'Inter,sans-serif'}}>
 
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            AI Governance Cockpit
-          </h1>
-          <p className="text-gray-400">
-            Paste an AI output below to check it against governance controls.
-          </p>
+      {/* Nav */}
+      <nav style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'20px 40px',borderBottom:'1px solid #1e1e20'}}>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{width:8,height:8,borderRadius:'50%',background:'#f59e0b',animation:'pulse 2s ease-in-out infinite'}}/>
+          <span style={{fontSize:13,fontWeight:500,letterSpacing:'.08em',textTransform:'uppercase'}}>AI Governance Cockpit</span>
         </div>
+        <span style={{fontSize:11,fontFamily:'monospace',color:'#f59e0b',background:'#1a1500',border:'1px solid #3d2e00',padding:'4px 10px',borderRadius:3}}>HO Hackathon 2026</span>
+      </nav>
 
-        {/* Input box */}
-        <div className="bg-gray-900 rounded-xl p-6 mb-6 border border-gray-800">
-          <label className="block text-sm font-medium text-gray-300 mb-3">
-            AI Output
-          </label>
-          <textarea
-            className="w-full bg-gray-800 text-white rounded-lg p-4 h-36
-            resize-none border border-gray-700 focus:border-blue-500
-            focus:outline-none text-sm"
-            placeholder="Paste AI output here e.g. Strong technical fit, though candidate's age and recent maternity leave may affect availability..."
-            value={output}
-            onChange={(e) => setOutput(e.target.value)}
-          />
-          <button
-            onClick={handleFlag}
-            disabled={loading || !output}
-            className="mt-4 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700
-            disabled:text-gray-500 text-white font-semibold py-3 px-6 rounded-lg
-            transition-colors"
-          >
-            {loading ? 'Checking...' : 'Check for Violations →'}
-          </button>
+      {/* Hero */}
+      <div style={{padding:'80px 40px 60px',maxWidth:860}}>
+        <div style={{fontSize:11,fontFamily:'monospace',color:'#f59e0b',letterSpacing:'.12em',textTransform:'uppercase',marginBottom:24,display:'flex',alignItems:'center',gap:8}}>
+          <span style={{display:'inline-block',width:20,height:1,background:'#f59e0b'}}/>
+          Live governance assurance
         </div>
+        <h1 style={{fontSize:52,fontWeight:300,lineHeight:1.1,letterSpacing:'-.02em',color:'#f0ede6',marginBottom:12}}>
+          AI outputs.<br/><span style={{fontWeight:600,color:'#f59e0b'}}>Governed in real time.</span>
+        </h1>
+        <p style={{fontSize:18,fontWeight:300,color:'#9a9690',lineHeight:1.6,maxWidth:560,marginBottom:48}}>
+          A compliance layer that sits between your AI systems and the people accountable for governing them. Every output checked. Every violation traced. Every flag auditable.
+        </p>
 
-        {/* Results */}
-        {result && (
-          <div className="space-y-4">
-
-            {/* Flag status bar */}
-            <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  {result.flagged ? (
-                    <span className="bg-red-500/20 text-red-400 border border-red-500/30
-                    px-3 py-1 rounded-full text-sm font-medium">
-                      ⚠ Violations Found
-                    </span>
-                  ) : (
-                    <span className="bg-green-500/20 text-green-400 border border-green-500/30
-                    px-3 py-1 rounded-full text-sm font-medium">
-                      ✓ No Violations
-                    </span>
-                  )}
-                  <span className="text-gray-500 text-sm">
-                    Audit ID: {result.auditId}
-                  </span>
-                </div>
-                {result.flagged && (
-                  <button
-                    onClick={() => setShowTraceback(!showTraceback)}
-                    className="text-blue-400 hover:text-blue-300 text-sm underline"
-                  >
-                    {showTraceback ? 'Hide traceback' : 'View full traceback →'}
-                  </button>
-                )}
-              </div>
-
-              {/* Violation cards */}
-              {result.violations?.map((v: any, i: number) => (
-                <div key={i} className="bg-gray-800 rounded-lg p-5 mb-4
-                border border-red-500/20">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-white font-medium text-sm">
-                      {v.type.replaceAll('_', ' ')}
-                    </span>
-                    <span className={`px-2 py-1 rounded text-xs font-bold ${
-                      v.severity === 'HIGH'
-                        ? 'bg-red-500/20 text-red-400'
-                        : v.severity === 'MEDIUM'
-                        ? 'bg-yellow-500/20 text-yellow-400'
-                        : 'bg-blue-500/20 text-blue-400'
-                    }`}>
-                      {v.severity}
-                    </span>
-                  </div>
-                  <p className="text-gray-300 text-sm mb-4">{v.rationale}</p>
-
-                  {v.matchedControl && (
-                    <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
-                      <p className="text-xs text-gray-500 mb-1">Matched Control</p>
-                      <p className="text-blue-400 text-sm font-medium">
-                        {v.matchedControl.ref}
-                      </p>
-                      <p className="text-gray-400 text-sm mt-1">
-                        {v.matchedControl.description}
-                      </p>
-                      {v.matchedControl.similarity && (
-                        <p className="text-green-400 text-xs mt-2">
-                          Semantic similarity: {v.matchedControl.similarity}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Traceback panel */}
-            {showTraceback && (
-              <div className="bg-gray-900 rounded-xl p-6 border border-gray-800">
-                <h2 className="text-white font-semibold mb-6 flex items-center gap-2">
-                  <span className="text-blue-400">⬡</span>
-                  Full Audit Traceback
-                </h2>
-
-                {/* Step 1 */}
-                <div className="flex gap-4 mb-6">
-                  <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 rounded-full bg-gray-700 text-gray-300
-                    text-xs flex items-center justify-center font-bold flex-shrink-0">
-                      1
-                    </div>
-                    <div className="w-px flex-1 bg-gray-700 mt-2"/>
-                  </div>
-                  <div className="pb-6">
-                    <p className="text-gray-400 text-xs mb-2 uppercase tracking-wider">
-                      AI Output Submitted
-                    </p>
-                    <div className="bg-gray-800 rounded-lg p-4 border border-gray-700">
-                      <p className="text-white text-sm">{output}</p>
-                      <p className="text-gray-500 text-xs mt-2">
-                        Source: TalentCo résumé screener
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Step 2 */}
-                {result.violations?.map((v: any, i: number) => (
-                  <div key={i} className="flex gap-4 mb-6">
-                    <div className="flex flex-col items-center">
-                      <div className="w-8 h-8 rounded-full bg-red-900 text-red-300
-                      text-xs flex items-center justify-center font-bold flex-shrink-0">
-                        2
-                      </div>
-                      <div className="w-px flex-1 bg-gray-700 mt-2"/>
-                    </div>
-                    <div className="pb-6">
-                      <p className="text-gray-400 text-xs mb-2 uppercase tracking-wider">
-                        Violation Detected
-                      </p>
-                      <div className="bg-red-950/40 rounded-lg p-4 border border-red-500/20">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-red-400 text-sm font-medium">
-                            {v.type.replaceAll('_', ' ')}
-                          </p>
-                          <span className="bg-red-500/20 text-red-400 text-xs px-2 py-1 rounded font-bold">
-                            {v.severity}
-                          </span>
-                        </div>
-                        <p className="text-gray-300 text-sm">{v.rationale}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Step 3 */}
-                {result.violations?.map((v: any, i: number) => v.matchedControl && (
-                  <div key={i} className="flex gap-4 mb-6">
-                    <div className="flex flex-col items-center">
-                      <div className="w-8 h-8 rounded-full bg-blue-900 text-blue-300
-                      text-xs flex items-center justify-center font-bold flex-shrink-0">
-                        3
-                      </div>
-                      <div className="w-px flex-1 bg-gray-700 mt-2"/>
-                    </div>
-                    <div className="pb-6">
-                      <p className="text-gray-400 text-xs mb-2 uppercase tracking-wider">
-                        Governance Control Matched via pgvector
-                      </p>
-                      <div className="bg-blue-950/40 rounded-lg p-4 border border-blue-500/20">
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-blue-400 text-sm font-medium">
-                            {v.matchedControl.ref}
-                          </p>
-                          <span className="bg-green-500/20 text-green-400 text-xs px-2 py-1 rounded">
-                            {v.matchedControl.similarity} match
-                          </span>
-                        </div>
-                        <p className="text-gray-300 text-sm">
-                          {v.matchedControl.description}
-                        </p>
-                        <p className="text-gray-500 text-xs mt-2">
-                          Framework: {v.matchedControl.framework}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-
-                {/* Step 4 */}
-                <div className="flex gap-4">
-                  <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 rounded-full bg-green-900 text-green-300
-                    text-xs flex items-center justify-center font-bold flex-shrink-0">
-                      4
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-xs mb-2 uppercase tracking-wider">
-                      Audit Record Written to Aurora PostgreSQL
-                    </p>
-                    <div className="bg-green-950/40 rounded-lg p-4 border border-green-500/20">
-                      <p className="text-green-400 text-sm font-mono">
-                        {result.auditId}
-                      </p>
-                      <p className="text-gray-500 text-xs mt-2">
-                        Timestamp: {new Date().toISOString()}
-                      </p>
-                      <p className="text-gray-500 text-xs mt-1">
-                        Immutable audit trail written · exportable as evidence
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            )}
+        {/* Terminal */}
+        <div style={{background:'#0f0f10',border:'1px solid #1e1e20',borderRadius:6,padding:24,marginBottom:48,maxWidth:680}}>
+          <div style={{display:'flex',gap:6,marginBottom:16}}>
+            <span style={{width:10,height:10,borderRadius:'50%',background:'#ff5f57',display:'inline-block'}}/>
+            <span style={{width:10,height:10,borderRadius:'50%',background:'#febc2e',display:'inline-block'}}/>
+            <span style={{width:10,height:10,borderRadius:'50%',background:'#28c840',display:'inline-block'}}/>
           </div>
-        )}
+          {[
+            {c:'#3d3d3f',t:'$ '},{c:'#9a9690',t:'POST /api/flag'},
+            {c:'#3d3d3f',t:'  output: "Strong technical fit, though candidate\'s age and maternity leave..."'},
+            {c:'#1e1e20',t:'\u00a0'},
+            {c:'#f59e0b',t:'⚠ VIOLATION DETECTED — HIGH severity'},
+            {c:'#9a9690',t:'type: PROTECTED_CHARACTERISTIC_REFERENCE'},
+            {c:'#9a9690',t:'matched_control: NIST-MANAGE-2.2 (similarity: 89%)'},
+            {c:'#60a5fa',t:'audit_id: 0595e6d8-9663-40a1-8b1b-be5ee4599b08'},
+            {c:'#34d399',t:'✓ Audit record written to Aurora PostgreSQL'},
+          ].map((l,i)=>(
+            <div key={i} style={{fontFamily:'monospace',fontSize:12,lineHeight:2,color:l.c}}>{l.t}</div>
+          ))}
+        </div>
+
+        {/* CTAs */}
+        <div style={{display:'flex',alignItems:'center',gap:16,flexWrap:'wrap'}}>
+          <a href="/cockpit" style={{background:'#f59e0b',color:'#0a0a0b',fontSize:13,fontWeight:600,padding:'12px 24px',borderRadius:4,textDecoration:'none',letterSpacing:'.04em'}}>
+            Open the Cockpit →
+          </a>
+          <span style={{fontSize:11,fontFamily:'monospace',color:'#9a9690',background:'transparent',padding:'12px 24px',borderRadius:4,border:'1px solid #2a2a2c'}}>
+            Aurora PostgreSQL + pgvector
+          </span>
+        </div>
       </div>
+
+      {/* Stats */}
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',borderTop:'1px solid #1e1e20',borderBottom:'1px solid #1e1e20'}}>
+        {[
+          {v:'12',l:'Governance controls',a:true},
+          {v:'512',l:'Vector dimensions',a:false},
+          {v:'<1s',l:'Flag latency',a:false},
+          {v:'3',l:'Frameworks covered',a:true},
+        ].map((s,i)=>(
+          <div key={i} style={{padding:'32px 40px',borderRight:i<3?'1px solid #1e1e20':'none'}}>
+            <div style={{fontSize:32,fontWeight:300,color:s.a?'#f59e0b':'#f0ede6',fontFamily:'monospace',marginBottom:6}}>{s.v}</div>
+            <div style={{fontSize:11,color:'#6b6a65',textTransform:'uppercase',letterSpacing:'.08em'}}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* How it works */}
+      <div style={{padding:'64px 40px',display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:32,maxWidth:1100}}>
+        {[
+          {n:'01',t:'Paste AI output',d:'Submit any AI-generated text from your hiring, lending, or healthcare systems.',tag:'Next.js · Vercel'},
+          {n:'02',t:'Semantic violation match',d:'pgvector finds the most relevant governance control by meaning, not keywords.',tag:'Aurora · pgvector'},
+          {n:'03',t:'Immutable audit trail',d:'Every flag written to Aurora with full lineage — exportable as evidence for regulators.',tag:'NIST AI RMF · ISO 42001'},
+        ].map((s,i)=>(
+          <div key={i} style={{borderTop:'1px solid #1e1e20',paddingTop:24}}>
+            <div style={{fontFamily:'monospace',fontSize:11,color:'#3d3d3f',marginBottom:16}}>{s.n}</div>
+            <div style={{fontSize:15,fontWeight:500,color:'#e8e6e0',marginBottom:8}}>{s.t}</div>
+            <div style={{fontSize:13,color:'#6b6a65',lineHeight:1.6}}>{s.d}</div>
+            <span style={{display:'inline-block',marginTop:12,fontSize:10,fontFamily:'monospace',color:'#f59e0b',background:'#1a1500',border:'1px solid #3d2e00',padding:'3px 8px',borderRadius:2}}>{s.tag}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Flag demo */}
+      <div style={{margin:'0 40px 48px',border:'1px solid #2a1500',borderRadius:6,background:'#0f0a00',padding:'20px 24px',maxWidth:640,display:'flex',alignItems:'center',gap:16}}>
+        <div style={{width:36,height:36,background:'#f59e0b',borderRadius:4,display:'flex',alignItems:'center',justifyContent:'center',fontSize:16,flexShrink:0}}>⚠</div>
+        <div style={{flex:1}}>
+          <div style={{fontSize:12,fontWeight:500,color:'#f59e0b',marginBottom:4,fontFamily:'monospace'}}>PROTECTED_CHARACTERISTIC_REFERENCE</div>
+          <div style={{fontSize:12,color:'#9a9690',lineHeight:1.5}}>References candidate age and family/parental status — protected characteristics. Matched to NIST-MANAGE-2.2 via semantic similarity search.</div>
+        </div>
+        <div style={{background:'#7c1d06',color:'#fca5a5',fontSize:10,fontFamily:'monospace',padding:'3px 8px',borderRadius:2,flexShrink:0,alignSelf:'flex-start'}}>HIGH</div>
+      </div>
+
+      {/* Stack */}
+      <div style={{background:'#0f0f10',borderTop:'1px solid #1e1e20',padding:'48px 40px',display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:24,maxWidth:900}}>
+        {[
+          {icon:'PG',n:'Aurora PostgreSQL 17',d:'Serverless v2 on AWS. System of record for controls, audit events, violations, and risk register.'},
+          {icon:'vec',n:'pgvector',d:'ivfflat index with cosine similarity. Semantic control matching — understands meaning, not just keywords.'},
+          {icon:'AI',n:'Voyage AI embeddings',d:'512-dimensional embeddings for 12 verified NIST AI RMF, ISO 42001, and fairness controls.'},
+          {icon:'▲',n:'Next.js on Vercel',d:'Hero interaction: paste → flag → traceback → audit export. Live at governance-cockpit.vercel.app'},
+        ].map((s,i)=>(
+          <div key={i} style={{display:'flex',gap:16,alignItems:'flex-start'}}>
+            <div style={{width:36,height:36,border:'1px solid #1e1e20',borderRadius:4,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontFamily:'monospace',fontSize:10,color:'#f59e0b',background:'#0a0a0b'}}>{s.icon}</div>
+            <div>
+              <div style={{fontSize:13,fontWeight:500,color:'#e8e6e0',marginBottom:3}}>{s.n}</div>
+              <div style={{fontSize:12,color:'#6b6a65',lineHeight:1.5}}>{s.d}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <footer style={{borderTop:'1px solid #1e1e20',padding:'24px 40px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <span style={{fontSize:11,color:'#3d3d3f',fontFamily:'monospace'}}>governance-cockpit.vercel.app</span>
+        <span style={{fontSize:11,color:'#3d3d3f'}}>Built for HO Hackathon · June 2026</span>
+      </footer>
+
     </main>
   )
 }
