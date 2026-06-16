@@ -98,15 +98,17 @@ export default function Home() {
                 <p className="text-gray-300 text-sm mb-4">{v.rationale}</p>
 
                 {/* Matched control */}
-                <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
-                  <p className="text-xs text-gray-500 mb-1">Matched Control</p>
-                  <p className="text-blue-400 text-sm font-medium">
-                    {v.matchedControl.ref}
-                  </p>
-                  <p className="text-gray-400 text-sm mt-1">
-                    {v.matchedControl.description}
-                  </p>
-                </div>
+                {v.matchedControl && (
+                  <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                    <p className="text-xs text-gray-500 mb-1">Matched Control</p>
+                    <p className="text-blue-400 text-sm font-medium">
+                      {v.matchedControl.ref}
+                    </p>
+                    <p className="text-gray-400 text-sm mt-1">
+                      {v.matchedControl.description}
+                    </p>
+                  </div>
+                )}
               </div>
             ))}
           </div>
