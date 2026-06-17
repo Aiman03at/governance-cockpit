@@ -1,3 +1,5 @@
+import 'dotenv/config'
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 import { Pool } from 'pg'
 import { CONTROLS } from '../lib/controls'
 import { getEmbedding } from '../lib/embeddings'

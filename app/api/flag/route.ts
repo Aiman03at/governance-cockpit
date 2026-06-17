@@ -15,20 +15,32 @@ const PROTECTED_CHARACTERISTICS = [
   'parental', 'paternity'
 ]
 
-function detectViolations(output: string) {
+// Similarity threshold for semantic (meaning-based) detection.
+// Tuned so indirect/coded language (e.g. "energetic recent graduates
+// without family obligations") crosses the bar even with no explicit
+// protected-characteristic keyword present.
+const SEMANTIC_SIMILARITY_THRESHOLD = 0.80
+
+function detectKeywordViolations(output: string) {
   const lower = output.toLowerCase()
   return PROTECTED_CHARACTERISTICS.filter(c => lower.includes(c))
 }
 
 export async function POST(req: NextRequest) {
   const { output, source } = await req.json()
-  const found = detectViolations(output)
 
-  if (found.length === 0) {
+  const keywordHits = detectKeywordViolations(output)
+
+  // Always run semantic matching — this is what makes "meaning, not
+  // keywords" true. Previously this only ran after a keyword hit, so
+  // indirect/coded language never reached pgvector at all.
+  const matchedControl = await findMatchingControl(output)
+  const semanticHit = matchedControl !== null && matchedControl.similarity >= SEMANTIC_SIMILARITY_THRESHOLD
+
+  if (keywordHits.length === 0 && !semanticHit) {
     return NextResponse.json({ flagged: false, auditId: null, violations: [] })
   }
 
-  const matchedControl = await findMatchingControl(output)
   const auditId = randomUUID()
 
   await pool.query(
@@ -36,10 +48,14 @@ export async function POST(req: NextRequest) {
     [auditId, output, source || 'unknown']
   )
 
+  const rationale = keywordHits.length > 0
+    ? `References protected characteristics: ${keywordHits.join(', ')}. Employment AI must not factor these into assessments.`
+    : `Output semantically matches governance control language on protected-characteristic proxies (similarity ${Math.round(matchedControl.similarity * 100)}%), despite containing no explicit protected-characteristic keywords. Likely indirect or coded discriminatory language.`
+
   const violation = {
     type: 'PROTECTED_CHARACTERISTIC_REFERENCE',
     severity: 'HIGH',
-    rationale: `References protected characteristics: ${found.join(', ')}. Employment AI must not factor these into assessments.`,
+    rationale,
     matchedControl: matchedControl ? {
       ref: matchedControl.control_ref,
       framework: matchedControl.framework,

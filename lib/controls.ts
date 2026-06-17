@@ -15,7 +15,7 @@ export const CONTROLS = [
     id: 'NIST-MEA-2.2',
     framework: 'NIST_AI_RMF',
     controlRef: 'MEASURE 2.2',
-    description: 'AI system outputs are evaluated for bias and fairness. Outputs referencing protected characteristics such as age, pregnancy, maternity leave, or family status in employment contexts are flagged for review.'
+    description: 'AI system outputs are evaluated for bias and fairness. Outputs referencing protected characteristics such as age, pregnancy, maternity leave, or family status in employment contexts are flagged for review. This includes coded or indirect phrasing that proxies for protected characteristics, such as preferring "energetic recent graduates," candidates who are "fully available" or have "no family obligations," or describing someone as a "digital native" — language that signals age or family-status discrimination without naming it explicitly.'
   },
   {
     id: 'NIST-MGT-2.2',
@@ -45,13 +45,13 @@ export const CONTROLS = [
     id: 'FAIRNESS-1',
     framework: 'FAIRNESS',
     controlRef: 'Anti-Discrimination § 1',
-    description: 'AI hiring tools must not produce outputs that reference, infer, or score candidates based on age, race, gender, pregnancy, maternity or paternity leave, family status, disability, religion, or national origin.'
+    description: 'AI hiring tools must not produce outputs that reference, infer, or score candidates based on age, race, gender, pregnancy, maternity or paternity leave, family status, disability, religion, or national origin. This prohibition extends to coded language used as a proxy for these characteristics, including phrases like "energetic young team," "recent graduates only," "without family obligations," "fully available outside work hours," or "culture fit for a fast-paced startup" when used to filter or score candidates.'
   },
   {
     id: 'FAIRNESS-2',
     framework: 'FAIRNESS',
     controlRef: 'Anti-Discrimination § 2',
-    description: 'Employment AI systems must not make predictions about candidate availability, reliability, or performance based on protected characteristics including family obligations, pregnancy status, or parental leave history.'
+    description: 'Employment AI systems must not make predictions about candidate availability, reliability, or performance based on protected characteristics including family obligations, pregnancy status, or parental leave history. This includes indirect framing such as questioning whether a candidate is "fully committed," "available for travel and overtime," or "without outside obligations" when used as a stand-in for family or caregiving status.'
   },
   {
     id: 'FAIRNESS-3',
