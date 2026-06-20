@@ -12,14 +12,17 @@ const PROTECTED_CHARACTERISTICS = [
   'age', 'maternity', 'pregnancy', 'gender', 'race',
   'religion', 'disability', 'nationality', 'ethnicity',
   'sexual orientation', 'family status', 'marital status',
-  'parental', 'paternity'
+  'parental', 'paternity',
+  // Indirect proxies — common coded language for protected characteristics
+  'family obligations', 'family commitments', 'family responsibilities',
+  'recent graduate', 'energetic young', 'digital native',
 ]
 
 // Similarity threshold for semantic (meaning-based) detection.
-// Tuned so indirect/coded language (e.g. "energetic recent graduates
+// Lowered to 0.72 so indirect/coded language (e.g. "energetic recent graduates
 // without family obligations") crosses the bar even with no explicit
 // protected-characteristic keyword present.
-const SEMANTIC_SIMILARITY_THRESHOLD = 0.80
+const SEMANTIC_SIMILARITY_THRESHOLD = 0.72
 
 function detectKeywordViolations(output: string) {
   const lower = output.toLowerCase()

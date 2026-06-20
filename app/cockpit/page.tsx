@@ -46,7 +46,10 @@ export default function Home() {
             focus:outline-none text-sm"
             placeholder="Paste AI output here e.g. Strong technical fit, though candidate's age and recent maternity leave may affect availability..."
             value={output}
-            onChange={(e) => setOutput(e.target.value)}
+            onChange={(e) => {
+              setOutput(e.target.value)
+              if (!e.target.value) { setResult(null); setShowTraceback(false) }
+            }}
           />
           <button
             onClick={handleFlag}
@@ -78,9 +81,11 @@ export default function Home() {
                       ✓ No Violations
                     </span>
                   )}
-                  <span className="text-gray-500 text-sm">
-                    Audit ID: {result.auditId}
-                  </span>
+                  {result.auditId && (
+                    <span className="text-gray-500 text-sm">
+                      Audit ID: {result.auditId}
+                    </span>
+                  )}
                 </div>
                 {result.flagged && (
                   <button
