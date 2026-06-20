@@ -51,15 +51,26 @@ export default function Home() {
               if (!e.target.value) { setResult(null); setShowTraceback(false) }
             }}
           />
-          <button
-            onClick={handleFlag}
-            disabled={loading || !output}
-            className="mt-4 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700
-            disabled:text-gray-500 text-white font-semibold py-3 px-6 rounded-lg
-            transition-colors"
-          >
-            {loading ? 'Checking...' : 'Check for Violations →'}
-          </button>
+          <div className="mt-4 flex gap-3">
+            <button
+              onClick={handleFlag}
+              disabled={loading || !output}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700
+              disabled:text-gray-500 text-white font-semibold py-3 px-6 rounded-lg
+              transition-colors"
+            >
+              {loading ? 'Checking...' : 'Check for Violations →'}
+            </button>
+            {output && (
+              <button
+                onClick={() => { setOutput(''); setResult(null); setShowTraceback(false) }}
+                className="bg-gray-700 hover:bg-gray-600 text-gray-300 font-semibold
+                py-3 px-6 rounded-lg transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Results */}
