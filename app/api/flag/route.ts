@@ -13,34 +13,41 @@ const PROTECTED_CHARACTERISTICS = [
   'religion', 'disability', 'nationality', 'ethnicity',
   'sexual orientation', 'family status', 'marital status',
   'parental', 'paternity',
-  // Indirect proxies — common coded language for protected characteristics
-  'family obligations', 'family commitments', 'family responsibilities',
-  'recent graduate', 'energetic young', 'digital native',
 ]
 
-// Similarity threshold for semantic (meaning-based) detection.
-// Lowered to 0.72 so indirect/coded language (e.g. "energetic recent graduates
-// without family obligations") crosses the bar even with no explicit
-// protected-characteristic keyword present.
-const SEMANTIC_SIMILARITY_THRESHOLD = 0.72
+const BIAS_PROXY_PHRASES = [
+  'family obligation', 'family commitment', 'family responsibilit',
+  'outside commitment', 'outside obligation', 'personal commitment',
+  'recent grad', 'young and energetic', 'energetic young',
+  'digital native', 'culture fit', 'cultural fit',
+  'child care', 'childcare burden',
+  'no dependents', 'without dependents',
+  'no kids', 'without kids', 'without children',
+  'physical demands', 'physically demanding',
+]
+
+const SEMANTIC_SIMILARITY_THRESHOLD = 0.65
 
 function detectKeywordViolations(output: string) {
   const lower = output.toLowerCase()
   return PROTECTED_CHARACTERISTICS.filter(c => lower.includes(c))
 }
 
+function detectProxyBias(output: string): string[] {
+  const lower = output.toLowerCase()
+  return BIAS_PROXY_PHRASES.filter(p => lower.includes(p))
+}
+
 export async function POST(req: NextRequest) {
   const { output, source } = await req.json()
 
   const keywordHits = detectKeywordViolations(output)
+  const proxyHits = detectProxyBias(output)
 
-  // Always run semantic matching — this is what makes "meaning, not
-  // keywords" true. Previously this only ran after a keyword hit, so
-  // indirect/coded language never reached pgvector at all.
   const matchedControl = await findMatchingControl(output)
   const semanticHit = matchedControl !== null && matchedControl.similarity >= SEMANTIC_SIMILARITY_THRESHOLD
 
-  if (keywordHits.length === 0 && !semanticHit) {
+  if (keywordHits.length === 0 && proxyHits.length === 0 && !semanticHit) {
     return NextResponse.json({ flagged: false, auditId: null, violations: [] })
   }
 
@@ -51,9 +58,14 @@ export async function POST(req: NextRequest) {
     [auditId, output, source || 'unknown']
   )
 
-  const rationale = keywordHits.length > 0
-    ? `References protected characteristics: ${keywordHits.join(', ')}. Employment AI must not factor these into assessments.`
-    : `Output semantically matches governance control language on protected-characteristic proxies (similarity ${Math.round(matchedControl.similarity * 100)}%), despite containing no explicit protected-characteristic keywords. Likely indirect or coded discriminatory language.`
+  let rationale: string
+  if (keywordHits.length > 0) {
+    rationale = `References protected characteristics: ${keywordHits.join(', ')}. Employment AI must not factor these into assessments.`
+  } else if (proxyHits.length > 0) {
+    rationale = `Contains indirect proxy language for protected characteristics: "${proxyHits.join('", "')}". These phrases are commonly used as coded substitutes for age, family status, or other protected attributes in employment contexts.`
+  } else {
+    rationale = `Output semantically matches governance control language on protected-characteristic proxies (similarity ${Math.round(matchedControl!.similarity * 100)}%), despite containing no explicit protected-characteristic keywords. Likely indirect or coded discriminatory language.`
+  }
 
   const violation = {
     type: 'PROTECTED_CHARACTERISTIC_REFERENCE',
